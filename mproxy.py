@@ -165,8 +165,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
       site_cert, site_key = cert_gen(domain)
     self.server.file_lock.release()
     try:
-      self.connection = ssl.wrap_socket(self.connection, keyfile=site_key, certfile=site_cert, server_side=True)
-    #Ignore errors
+      context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+      context.load_cert_chain(site_cert, site_key)
+      self.connection = context.wrap_socket(self.connection, server_side=True)
     except:
       pass
     #New rfile and wfile need to be set up for socket as the originals point to unwrapped socket.
